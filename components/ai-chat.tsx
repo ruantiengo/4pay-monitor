@@ -5,19 +5,19 @@ import { useEffect, useRef, useState } from "react"
 import { useChat } from "@ai-sdk/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
 import { Avatar } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Send, Loader2 } from "lucide-react"
+import { Send, Loader2, Copy } from "lucide-react"
 import { useEnvironment } from "@/contexts/environment-context"
 import { toast } from "sonner"
 import ReactMarkdown from "react-markdown"
+import { Textarea } from "@/components/ui/textarea"
 
 export function AIChat() {
   const { environment } = useEnvironment()
   const scrollAreaRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [mounted, setMounted] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setMessages } = useChat({
     api: "/api/chat",
@@ -67,17 +67,12 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
     },
   })
 
-  // Ajustar altura do textarea automaticamente
+  // Ajustar a altura do textarea conforme o conteúdo
   useEffect(() => {
     if (textareaRef.current) {
-      // Reset height - importante para diminuir quando o texto é removido
       textareaRef.current.style.height = "auto"
-
-      // Definir a nova altura com base no conteúdo
       const scrollHeight = textareaRef.current.scrollHeight
-      // Limitar a altura máxima a 120px
-      const newHeight = Math.min(scrollHeight, 120)
-      textareaRef.current.style.height = `${newHeight}px`
+      textareaRef.current.style.height = `${Math.min(scrollHeight, 120)}px`
     }
   }, [input])
 
@@ -111,6 +106,13 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
     })
   }
 
+  const copyMessage = (content: string) => {
+    navigator.clipboard.writeText(content)
+    toast("Copiado!", {
+      description: "Mensagem copiada para a área de transferência",
+    })
+  }
+
   if (!mounted) return null
 
   const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
@@ -127,9 +129,10 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`flex items-start gap-2 max-w-[80%] ${message.role === "user" ? "flex-row-reverse" : ""}`}
+                  className={`flex items-start gap-2 ${message.role === "user" ? "flex-row-reverse" : ""}`}
+                  style={{ maxWidth: "85%" }}
                 >
-                  <Avatar className="h-6 w-6">
+                  <Avatar className="h-6 w-6 flex-shrink-0">
                     <div
                       className={`flex h-full w-full items-center justify-center rounded-full ${
                         message.role === "user" ? "bg-green-500" : "bg-zinc-700"
@@ -141,10 +144,28 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
                   <div
                     className={`rounded-lg p-3 ${
                       message.role === "user" ? "bg-green-500 text-white" : "bg-zinc-800 text-white"
-                    }`}
+                    } relative group`}
                   >
-                    <ReactMarkdown>{message.content}</ReactMarkdown>
-                    <p className="text-[10px] opacity-50 mt-1">{currentTime}</p>
+                    <div
+                      className="whitespace-pre-wrap break-all overflow-x-auto max-w-full"
+                      style={{ wordBreak: "break-word" }}
+                    >
+                      {message.role === "user" ? (
+                        <pre className="text-xs font-sans">{message.content}</pre>
+                      ) : (
+                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="text-[10px] opacity-50">{currentTime}</p>
+                      <button
+                        onClick={() => copyMessage(message.content)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Copiar mensagem"
+                      >
+                        <Copy className="h-3 w-3 text-white/50 hover:text-white/80" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -152,8 +173,8 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
 
             {isLoading && messages[messages.length - 1]?.role === "user" && (
               <div className="flex justify-start">
-                <div className="flex items-start gap-2 max-w-[80%]">
-                  <Avatar className="h-6 w-6">
+                <div className="flex items-start gap-2" style={{ maxWidth: "85%" }}>
+                  <Avatar className="h-6 w-6 flex-shrink-0">
                     <div className="flex h-full w-full items-center justify-center rounded-full bg-zinc-700">AI</div>
                   </Avatar>
                   <div className="rounded-lg p-2 bg-zinc-800">
