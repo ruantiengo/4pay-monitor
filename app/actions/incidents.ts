@@ -187,6 +187,7 @@ export async function calculateAvailability(environment: Environment, month?: Da
     // Calcular a diferença
     const difference = availabilityPercentage - lastMonthAvailability
 
+
     return {
       success: true,
       availability: Number(availabilityPercentage.toFixed(2)),
@@ -287,3 +288,4 @@ export async function updateIncident(
     return { success: false, error: String(error) }
   }
 }
+
