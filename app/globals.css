@@ -140,3 +140,92 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos para o chat */
+.chat-message-content {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.markdown-wrapper {
+  width: 100%;
+}
+
+.markdown-wrapper p {
+  margin-bottom: 0.75rem;
+}
+
+.markdown-wrapper p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-wrapper ul,
+.markdown-wrapper ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.markdown-wrapper li {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-wrapper h1,
+.markdown-wrapper h2,
+.markdown-wrapper h3,
+.markdown-wrapper h4 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.markdown-wrapper code {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.2rem;
+  font-family: monospace;
+}
+
+.markdown-wrapper pre {
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 0.5rem;
+  border-radius: 0.3rem;
+  overflow-x: auto;
+  margin-bottom: 0.5rem;
+}
+
+.markdown-wrapper pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.markdown-wrapper blockquote {
+  border-left: 3px solid rgba(255, 255, 255, 0.2);
+  padding-left: 0.75rem;
+  margin-left: 0;
+  margin-right: 0;
+  font-style: italic;
+}
+
+.markdown-wrapper a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.markdown-wrapper table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.markdown-wrapper th,
+.markdown-wrapper td {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.5rem;
+  text-align: left;
+}
+
+.markdown-wrapper th {
+  background-color: rgba(0, 0, 0, 0.2);
+}

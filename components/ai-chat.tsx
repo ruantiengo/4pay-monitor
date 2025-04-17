@@ -1,29 +1,110 @@
 "use client"
 
 import type React from "react"
+
 import { useEffect, useRef, useState } from "react"
 import { useChat } from "@ai-sdk/react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar } from "@/components/ui/avatar"
+import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Send, Loader2, Copy } from "lucide-react"
+import { Send, Loader2, Copy, User, Bot } from "lucide-react"
 import { useEnvironment } from "@/contexts/environment-context"
 import { toast } from "sonner"
 import ReactMarkdown from "react-markdown"
-import { Textarea } from "@/components/ui/textarea"
 
 export function AIChat() {
   const { environment } = useEnvironment()
   const scrollAreaRef = useRef<HTMLDivElement>(null)
-  const [mounted, setMounted] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [mounted, setMounted] = useState(false)
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setMessages } = useChat({
     api: "/api/chat",
     body: { environment },
     initialMessages: [
       {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
+        id: "welcome-message",
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
+        role: "assistant",
+      },   {
         id: "welcome-message",
         content: `Olá! 👋
 
@@ -67,7 +148,7 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
     },
   })
 
-  // Ajustar a altura do textarea conforme o conteúdo
+  // Ajustar altura do textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto"
@@ -76,10 +157,14 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
     }
   }, [input])
 
+  
+  const scrollToBottom = () => {
+   
+  }
+
+  // Rolar para o final quando novas mensagens são adicionadas
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
-    }
+    scrollToBottom()
   }, [messages])
 
   useEffect(() => {
@@ -115,80 +200,104 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
 
   if (!mounted) return null
 
-  const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-
   return (
-    <Card className="flex flex-col h-[500px] border-zinc-800">
-      <CardHeader className="pb-2 pt-3 px-4 border-b border-zinc-800">
+    <Card className="flex flex-col h-[800px] border-zinc-800">
+      <CardHeader className="pb-2 pt-3 px-4 border-b border-zinc-800 flex-shrink-0">
         <CardTitle className="text-sm font-medium text-zinc-400">Assistente IA - {environment}</CardTitle>
       </CardHeader>
 
-      <CardContent className="flex-grow overflow-hidden p-0">
-        <ScrollArea className="h-[400px] px-4 py-2" ref={scrollAreaRef}>
-          <div className="space-y-3">
-            {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
+    
+        <ScrollArea className="flex-grow overflow-hidden p-0 flex flex-col" >
+          <div className="py-4 min-h-full flex flex-col">
+            <div className="flex-grow">
+              {messages.map((message) => (
                 <div
-                  className={`flex items-start gap-2 ${message.role === "user" ? "flex-row-reverse" : ""}`}
-                  style={{ maxWidth: "85%" }}
+                  key={message.id}
+                  className={`px-4 py-2 flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <Avatar className="h-6 w-6 flex-shrink-0">
+                  <div className={`flex max-w-[50%] ${message.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
                     <div
-                      className={`flex h-full w-full items-center justify-center rounded-full ${
-                        message.role === "user" ? "bg-green-500" : "bg-zinc-700"
-                      }`}
+                      className={`
+                        p-3 rounded-lg relative 
+                        ${message.role === "user" ? "bg-green-500 text-white mr-2" : "bg-zinc-800 text-white ml-2"}
+                      `}
                     >
-                      {message.role === "user" ? "U" : "AI"}
+                      <div className="chat-message-content">
+                        {message.role === "user" ? (
+                          <div className="text-xs overflow-x-auto">
+                            <pre className="whitespace-pre-wrap break-words font-sans">{message.content}</pre>
+                          </div>
+                        ) : (
+                          <div className="text-xs overflow-x-auto markdown-wrapper">
+                            <ReactMarkdown>{message.content}</ReactMarkdown>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex justify-between items-center mt-2 pt-1 border-t border-white/10">
+                        <span className="text-[10px] opacity-70">
+                          {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                        <button
+                          onClick={() => copyMessage(message.content)}
+                          className="opacity-70 hover:opacity-100 transition-opacity"
+                          aria-label="Copiar mensagem"
+                        >
+                          <Copy className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
-                  </Avatar>
-                  <div
-                    className={`rounded-lg p-3 ${
-                      message.role === "user" ? "bg-green-500 text-white" : "bg-zinc-800 text-white"
-                    } relative group`}
-                  >
+
                     <div
-                      className="whitespace-pre-wrap break-all overflow-x-auto max-w-full"
-                      style={{ wordBreak: "break-word" }}
+                      className={`
+                        flex items-center justify-center h-8 w-8 rounded-full flex-shrink-0 
+                        ${message.role === "user" ? "bg-green-600" : "bg-zinc-700"}
+                      `}
                     >
                       {message.role === "user" ? (
-                        <pre className="text-xs font-sans">{message.content}</pre>
+                        <User className="h-4 w-4 text-white" />
                       ) : (
-                        <ReactMarkdown>{message.content}</ReactMarkdown>
+                        <Bot className="h-4 w-4 text-white" />
                       )}
                     </div>
-                    <div className="flex justify-between items-center mt-1">
-                      <p className="text-[10px] opacity-50">{currentTime}</p>
-                      <button
-                        onClick={() => copyMessage(message.content)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        aria-label="Copiar mensagem"
-                      >
-                        <Copy className="h-3 w-3 text-white/50 hover:text-white/80" />
-                      </button>
+                  </div>
+                </div>
+              ))}
+
+              {isLoading && messages[messages.length - 1]?.role === "user" && (
+                <div className="px-4 py-2 flex justify-start">
+                  <div className="flex max-w-[50%]">
+                    <div className="flex items-center justify-center h-8 w-8 rounded-full bg-zinc-700 flex-shrink-0">
+                      <Bot className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="bg-zinc-800 text-white ml-2 p-3 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <div
+                          className="w-2 h-2 bg-white rounded-full animate-bounce"
+                          style={{ animationDelay: "0ms" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-white rounded-full animate-bounce"
+                          style={{ animationDelay: "300ms" }}
+                        ></div>
+                        <div
+                          className="w-2 h-2 bg-white rounded-full animate-bounce"
+                          style={{ animationDelay: "600ms" }}
+                        ></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-
-            {isLoading && messages[messages.length - 1]?.role === "user" && (
-              <div className="flex justify-start">
-                <div className="flex items-start gap-2" style={{ maxWidth: "85%" }}>
-                  <Avatar className="h-6 w-6 flex-shrink-0">
-                    <div className="flex h-full w-full items-center justify-center rounded-full bg-zinc-700">AI</div>
-                  </Avatar>
-                  <div className="rounded-lg p-2 bg-zinc-800">
-                    <p className="text-xs text-white">Digitando...</p>
-                  </div>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
+            {/* Elemento invisível para referência de rolagem */}
+            <div ref={messagesEndRef} className="h-4" />
           </div>
         </ScrollArea>
-      </CardContent>
+     
 
-      <div className="p-2 border-t border-zinc-800">
-        <div className="flex w-full items-center space-x-2">
+      <div className="p-3 border-t border-zinc-800 flex-shrink-0">
+        <div className="flex items-end space-x-2">
           <Textarea
             ref={textareaRef}
             placeholder="Digite sua mensagem..."
@@ -196,12 +305,12 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             disabled={isLoading}
-            className="flex-1 min-h-8 max-h-[120px] bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs resize-none overflow-y-auto py-2"
+            className="flex-1 min-h-[40px] max-h-[120px] bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs resize-none overflow-y-auto py-2 rounded-md"
             rows={1}
           />
           {isLoading ? (
-            <Button onClick={handleCancelRequest} size="sm" variant="destructive" className="h-8 px-2 self-start">
-              <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+            <Button onClick={handleCancelRequest} size="sm" variant="destructive" className="h-10 px-3">
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
               Cancelar
             </Button>
           ) : (
@@ -209,9 +318,9 @@ Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou a
               onClick={(e) => handleSubmit(e as any)}
               disabled={!input.trim()}
               size="sm"
-              className="bg-green-500 hover:bg-green-600 text-white h-8 px-2 self-start"
+              className="bg-green-500 hover:bg-green-600 text-white h-10 px-3"
             >
-              <Send className="h-3.5 w-3.5" />
+              <Send className="h-4 w-4" />
             </Button>
           )}
         </div>
