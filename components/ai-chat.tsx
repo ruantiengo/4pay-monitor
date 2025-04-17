@@ -2,128 +2,112 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useChat } from "@ai-sdk/react"
+import { useRef, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Send } from "lucide-react"
+import { Send, Loader2 } from "lucide-react"
 import { useEnvironment } from "@/contexts/environment-context"
-
-
-type Message = {
-  id: string
-  content: string
-  role: "user" | "assistant"
-  timestamp: Date
-}
+import { toast } from "sonner"
 
 export function AIChat() {
   const { environment } = useEnvironment()
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      content: `Olá! Sou o assistente de monitoramento para o ambiente ${environment}. Como posso ajudar?`,
-      role: "assistant",
-      timestamp: new Date(),
-    },
-  ])
-  const [input, setInput] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
-  // Rolar para o final quando novas mensagens são adicionadas
+  // Use AI SDK's useChat hook with configuration
+  const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setMessages} = useChat({
+    api: "/api/chat",
+    // Pass environment to the API
+    body: {
+      environment,
+    },
+    // Initialize with welcome message
+    initialMessages: [
+      {
+        id: "welcome-message",
+        content: `Olá! Sou o assistente de monitoramento para o ambiente ${environment}. Como posso ajudar?`,
+        role: "assistant",
+      },
+    ],
+    onResponse(response) {
+        const reader = response.body?.getReader();
+        if (reader) {
+          const decoder = new TextDecoder("utf-8");
+          let result = "";
+
+          const readStream = async () => {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              result += decoder.decode(value, { stream: true });
+            }
+            console.log(result);
+            setMessages(old => [...old, {
+              id: crypto.randomUUID(),
+              role: "assistant",
+              content: JSON.parse(result)?.content,
+            }])
+          };
+
+          readStream().catch((error) => {
+            console.error("Error reading stream:", error);
+          });
+        }
+        
+    },
+    onError: () => {
+      toast("Erro de comunicação", {
+        description: "Não foi possível obter resposta do assistente.",
+      })
+    },
+  })
+
+  // Scroll to bottom when messages change
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
     }
   }, [messages])
 
-  const handleSendMessage = async () => {
-    if (!input.trim()) return
-
-    // Adicionar mensagem do usuário
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: input,
-      role: "user",
-      timestamp: new Date(),
-    }
-
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-    setIsLoading(true)
-
-    try {
-      // Enviar mensagem para a API do ChatGPT
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: input,
-          environment,
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Falha ao comunicar com a IA")
-      }
-
-      const data = await response.json()
-
-      // Adicionar resposta da IA
-      const assistantMessage: Message = {
-        id: Date.now().toString(),
-        content: data.response,
-        role: "assistant",
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, assistantMessage])
-    } catch (error) {
-      console.error("Erro ao enviar mensagem:", error)
-
-      // Adicionar mensagem de erro
-      const errorMessage: Message = {
-        id: Date.now().toString(),
-        content: "Desculpe, ocorreu um erro ao processar sua mensagem. Por favor, tente novamente.",
-        role: "assistant",
-        timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, errorMessage])
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Update welcome message when environment changes
+  useEffect(() => {
+    // Reset chat would be ideal here, but for now we'll just show a toast
+    toast("Ambiente alterado", {
+      description: `Agora conversando no ambiente ${environment}`,
+    })
+  }, [environment])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleSendMessage()
+      handleSubmit(e)
     }
   }
 
+  const handleCancelRequest = () => {
+    stop()
+    toast("Requisição cancelada", {
+      description: "A geração da resposta foi interrompida.",
+    })
+  }
+
   return (
-    <Card className="flex flex-col h-[600px]  rounded-lg">
-      <CardHeader className="pb-2 border-b border-zinc-800 flex flex-col gap-1">
-        <CardTitle className="text-white text-lg">Assistente IA</CardTitle>
-        <CardDescription className="text-zinc-400 text-sm">
-          Converse com o assistente para obter informações sobre o sistema
-        </CardDescription>
+    <Card className="flex flex-col h-[500px] border-zinc-800">
+      <CardHeader className="pb-2 pt-3 px-4 border-b border-zinc-800">
+        <CardTitle className="text-sm font-medium text-zinc-400">Assistente IA - {environment}</CardTitle>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden p-0">
-        <ScrollArea className="h-[450px] px-4 py-2" ref={scrollAreaRef}>
-          <div className="space-y-4">
+        <ScrollArea className="h-[400px] px-4 py-2" ref={scrollAreaRef}>
+          <div className="space-y-3">
             {messages.map((message) => (
               <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`flex items-start gap-3 max-w-[80%] ${message.role === "user" ? "flex-row-reverse" : ""}`}
+                  className={`flex items-start gap-2 max-w-[80%] ${message.role === "user" ? "flex-row-reverse" : ""}`}
                 >
-                  <Avatar className="h-8 w-8">
+                  <Avatar className="h-6 w-6">
                     <div
                       className={`flex h-full w-full items-center justify-center rounded-full ${
                         message.role === "user" ? "bg-green-500" : "bg-zinc-700"
@@ -133,26 +117,26 @@ export function AIChat() {
                     </div>
                   </Avatar>
                   <div
-                    className={`rounded-lg p-3 ${
+                    className={`rounded-lg p-2 ${
                       message.role === "user" ? "bg-green-500 text-white" : "bg-zinc-800 text-white"
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
-                    <p className="text-xs opacity-50 mt-1">
-                      {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    <p className="text-xs whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-[10px] opacity-50 mt-1">
+                      {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
                 </div>
               </div>
             ))}
-            {isLoading && (
+            {isLoading && messages[messages.length - 1]?.role === "user" && (
               <div className="flex justify-start">
-                <div className="flex items-start gap-3 max-w-[80%]">
-                  <Avatar className="h-8 w-8">
+                <div className="flex items-start gap-2 max-w-[80%]">
+                  <Avatar className="h-6 w-6">
                     <div className="flex h-full w-full items-center justify-center rounded-full bg-zinc-700">AI</div>
                   </Avatar>
-                  <div className="rounded-lg p-3 bg-zinc-800">
-                    <p className="text-sm text-white">Digitando...</p>
+                  <div className="rounded-lg p-2 bg-zinc-800">
+                    <p className="text-xs text-white">Digitando...</p>
                   </div>
                 </div>
               </div>
@@ -160,27 +144,33 @@ export function AIChat() {
           </div>
         </ScrollArea>
       </CardContent>
-      <CardFooter className="pt-0 border-t border-zinc-800 p-4">
+      <div className="p-2 border-t border-zinc-800">
         <div className="flex w-full items-center space-x-2">
           <Input
             placeholder="Digite sua mensagem..."
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             disabled={isLoading}
-            className="flex-1 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-400 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="flex-1 h-8 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs"
           />
-          <Button
-            onClick={handleSendMessage}
-            disabled={isLoading || !input.trim()}
-            size="icon"
-            className="bg-green-500 hover:bg-green-600 text-white"
-          >
-            <Send className="h-4 w-4" />
-            <span className="sr-only">Enviar mensagem</span>
-          </Button>
+          {isLoading ? (
+            <Button onClick={handleCancelRequest} size="sm" variant="destructive" className="h-8 px-2">
+              <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+              Cancelar
+            </Button>
+          ) : (
+            <Button
+              onClick={(e) => handleSubmit(e as any)}
+              disabled={!input.trim()}
+              size="sm"
+              className="bg-green-500 hover:bg-green-600 text-white h-8 px-2"
+            >
+              <Send className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </div>
-      </CardFooter>
+      </div>
     </Card>
   )
 }

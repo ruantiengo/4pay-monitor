@@ -106,7 +106,7 @@ export async function getBoletoStats(environment: Environment) {
 
 export async function getBoletoSuccessRate(environment: Environment) {
   try {
-    console.log(environment);
+ 
     
     const client = await getMongoClient(environment)
     const db = client.db("connect_bank")

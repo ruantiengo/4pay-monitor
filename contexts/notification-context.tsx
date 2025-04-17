@@ -45,7 +45,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   // Inicializar o elemento de áudio apenas uma vez
   useEffect(() => {
     if (typeof window !== "undefined" && !audioRef.current) {
-      audioRef.current = new Audio("/sounds/notification.mkv")
+      audioRef.current = new Audio("/sounds/notification.wav")
     }
     return () => {
       if (audioRef.current) {
@@ -61,15 +61,17 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   // Verificar se uma notificação existe (por ID)
   const hasNotification = useCallback(
     (id: string) => {
-      return allNotifications.some((n) => n.id === id)
+      const arr: { id: string }[] = JSON.parse(localStorage.getItem(`notifications-${environment}`) || "[]")
+      return arr.some((n) => n.id === id)
     },
-    [allNotifications],
+    [environment],
   )
 
   // Adicionar uma única notificação - usando useCallback para evitar recriações desnecessárias
   const addNotification = useCallback(
     (notification: Omit<Notification, "read">) => {
       // Verificar se a notificação já existe em TODAS as notificaç��es
+  
       if (hasNotification(notification.id)) return
 
       // Adicionar o ambiente atual se não estiver definido
@@ -102,6 +104,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     (newNotifications: Omit<Notification, "read">[]) => {
       if (newNotifications.length === 0) return
 
+     
+      
       // Filtrar apenas notificações que ainda não existem em TODAS as notificações
       const uniqueNotifications = newNotifications.filter((newNotif) => !hasNotification(newNotif.id))
 
@@ -196,7 +200,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     // Definir todas as notificações carregadas
     setAllNotifications(allLoadedNotifications)
 
-    console.log(`Carregadas ${allLoadedNotifications.length} notificações de todos os ambientes`)
+ 
   }, [])
 
   // Carregar notificações do localStorage ao iniciar ou quando o ambiente mudar
@@ -219,7 +223,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         // Marcar que já carregamos este ambiente
         initialLoadRef.current[environment] = true
 
-        console.log(`Carregadas ${parsedNotifications.length} notificações do ambiente ${environment}`)
+     
       } catch (error) {
         console.error("Erro ao carregar notificações:", error)
         // Não limpar as notificações existentes em caso de erro
@@ -328,7 +332,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       // Para cada ambiente, manter apenas as notificações mais recentes
       const limitedNotifications: Notification[] = []
 
-      Object.entries(notificationsByEnv).forEach(([env, envNotifications]) => {
+      Object.entries(notificationsByEnv).forEach(([, envNotifications]) => {
         // Ordenar por timestamp (mais recente primeiro)
         const sorted = [...envNotifications].sort(
           (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
@@ -344,7 +348,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       // Também atualizar a lista filtrada por ambiente
       setNotifications(limitedNotifications.filter((n) => n.environment === environment))
     }
-  }, [allNotifications.length, environment])
+  }, [allNotifications, environment])
 
   return (
     <NotificationContext.Provider
@@ -365,7 +369,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   )
 }
 
-export function useNotifications() {
+export function   useNotifications() {
   const context = useContext(NotificationContext)
   if (context === undefined) {
     throw new Error("useNotifications must be used within a NotificationProvider")
@@ -382,8 +386,8 @@ export function deadLetterToNotification(deadletter: DeadLetter, env?: string): 
   return {
     id: deadletter._id,
     type: "deadletter",
-    title: "Nova mensagem na fila",
-    message: `Nova mensagem na fila ${queueName}`,
+    title: "Nova mensagem na deadletter",
+    message: `O erro veio de:  ${queueName}`,
     timestamp: deadletter.created_at,
     data: deadletter,
     environment: env, // Incluir o ambiente passado como parâmetro

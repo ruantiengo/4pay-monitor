@@ -53,9 +53,11 @@ export function RabbitMQDeadLetter() {
 
         // Verificar se o cache é do ambiente atual
         if (parsedData.environment === environment) {
-          console.log(`Carregando ${parsedData.deadletters.length} mensagens do cache para o ambiente ${environment}`)
+   
           setDeadletters(parsedData.deadletters)
           setLastLoadTime(parsedData.lastLoadTime)
+      
+
           setLoading(false)
         } else {
           // Se o cache for de outro ambiente, limpar o estado
@@ -87,7 +89,7 @@ export function RabbitMQDeadLetter() {
       }
 
       localStorage.setItem(storageKey, JSON.stringify(cacheData))
-      console.log(`Salvando ${newDeadletters.length} mensagens no cache para o ambiente ${environment}`)
+  
     },
     [environment, getStorageKey],
   )
@@ -103,8 +105,7 @@ export function RabbitMQDeadLetter() {
       const result = await getDeadLetters(environment, lastLoadTime)
 
       if (result.success) {
-        console.log(`Buscadas ${result.deadletters.length} mensagens${lastLoadTime ? " novas" : ""}`)
-
+      
         // Atualizar o lastLoadTime para a próxima busca
         const newLastLoadTime = new Date().toISOString()
         setLastLoadTime(newLastLoadTime)
@@ -113,10 +114,9 @@ export function RabbitMQDeadLetter() {
           // Verificar quais mensagens são realmente novas (não estão no estado atual)
           const currentIds = new Set(deadletters.map((msg) => msg._id))
           const newMessages = result.deadletters.filter((msg) => !currentIds.has(msg._id))
-
+         
           if (newMessages.length > 0) {
-            console.log(`${newMessages.length} mensagens são realmente novas`)
-
+    
             // Criar notificações apenas para mensagens que não têm notificação existente
             const messagesToNotify = newMessages.filter((msg) => !hasNotification(msg._id))
 
@@ -127,11 +127,12 @@ export function RabbitMQDeadLetter() {
               const createdAt = new Date(msg.created_at)
               return createdAt >= oneWeekAgo
             })
-            console.log(recentMessagesToNotify);
-            
+        
             if (recentMessagesToNotify.length > 0) {
-              console.log(`Criando ${recentMessagesToNotify.length} novas notificações`)
+              
               const newNotifications = recentMessagesToNotify.map((msg) => deadLetterToNotification(msg, environment))
+              console.log(newNotifications.length);
+              
               addNotifications(newNotifications)
             }
 

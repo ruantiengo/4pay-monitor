@@ -11,8 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 
 export function   NotificationCenter() {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
-  console.log("Cade os nots", notifications);
-  
+
   const [open, setOpen] = useState(false)
   const [selectedNotification, setSelectedNotification] = useState<any>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)

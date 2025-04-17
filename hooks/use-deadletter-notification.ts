@@ -17,7 +17,7 @@ export function useDeadLetterNotifications(deadletters: DeadLetter[], environmen
   // Inicializar o elemento de áudio
   useEffect(() => {
     if (typeof window !== "undefined") {
-      audioRef.current = new Audio("/sounds/notification.mkv")
+      audioRef.current = new Audio("/sounds/notification.wav")
     }
     return () => {
       if (audioRef.current) {
@@ -48,8 +48,7 @@ export function useDeadLetterNotifications(deadletters: DeadLetter[], environmen
     try {
       const parsedState: DeadLetterNotificationState = JSON.parse(savedState)
 
-      // Verificar se há novas mensagens
-      const currentIds = new Set(deadletters.map((msg) => msg._id))
+
       const previousIds = new Set(parsedState.lastCheckedIds)
 
       // Encontrar mensagens que existem agora mas não existiam antes
