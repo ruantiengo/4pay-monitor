@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useEffect, useRef, useState } from "react"
 import { useChat } from "@ai-sdk/react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -15,7 +15,7 @@ import ReactMarkdown from "react-markdown"
 
 export function AIChat() {
   const { environment } = useEnvironment()
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [mounted, setMounted] = useState(false)
@@ -32,87 +32,7 @@ Sou o assistente inteligente responsável pelo monitoramento do ambiente **${env
 
 Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
         role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },   {
-        id: "welcome-message",
-        content: `Olá! 👋
-
-Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
-
-Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
-        role: "assistant",
-      },
+      }
     ],
     onResponse(response) {
       const reader = response.body?.getReader()
