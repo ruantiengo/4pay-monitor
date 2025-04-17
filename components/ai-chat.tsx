@@ -1,82 +1,101 @@
 "use client"
 
 import type React from "react"
-
+import { useEffect, useRef, useState } from "react"
 import { useChat } from "@ai-sdk/react"
-import { useRef, useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { Avatar } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Send, Loader2 } from "lucide-react"
 import { useEnvironment } from "@/contexts/environment-context"
 import { toast } from "sonner"
+import ReactMarkdown from "react-markdown"
 
 export function AIChat() {
   const { environment } = useEnvironment()
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const [mounted, setMounted] = useState(false)
 
-  // Use AI SDK's useChat hook with configuration
-  const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setMessages} = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, stop, setMessages } = useChat({
     api: "/api/chat",
-    // Pass environment to the API
-    body: {
-      environment,
-    },
-    // Initialize with welcome message
+    body: { environment },
     initialMessages: [
       {
         id: "welcome-message",
-        content: `Olá! Sou o assistente de monitoramento para o ambiente ${environment}. Como posso ajudar?`,
+        content: `Olá! 👋
+
+Sou o assistente inteligente responsável pelo monitoramento do ambiente **${environment}**. 
+
+Estou aqui para fornecer **suporte técnico**, **explicações detalhadas** ou até **relatórios analíticos**. Sinta-se à vontade para perguntar qualquer coisa!`,
         role: "assistant",
-      }
+      },
     ],
     onResponse(response) {
-        const reader = response.body?.getReader();
-        if (reader) {
-          const decoder = new TextDecoder("utf-8");
-          let result = "";
+      const reader = response.body?.getReader()
+      if (reader) {
+        const decoder = new TextDecoder("utf-8")
+        let result = ""
 
-          const readStream = async () => {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              result += decoder.decode(value, { stream: true });
-            }
-            console.log(result);
-            setMessages(old => [...old, {
-              id: crypto.randomUUID(),
-              role: "assistant",
-              content: JSON.parse(result)?.content,
-            }])
-          };
-
-          readStream().catch((error) => {
-            console.error("Error reading stream:", error);
-          });
+        const readStream = async () => {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            result += decoder.decode(value, { stream: true })
+          }
+          try {
+            const parsed = JSON.parse(result)
+            setMessages((old) => [
+              ...old,
+              {
+                id: crypto.randomUUID(),
+                role: "assistant",
+                content: parsed?.content || "Erro ao processar resposta.",
+              },
+            ])
+          } catch (err) {
+            console.error("Erro ao interpretar resposta:", err)
+          }
         }
-        
-    },
-    onError: () => {
-    
+
+        readStream().catch((error) => {
+          console.error("Erro ao ler o stream:", error)
+        })
+      }
     },
   })
 
-  // Scroll to bottom when messages change
+  // Ajustar altura do textarea automaticamente
+  useEffect(() => {
+    if (textareaRef.current) {
+      // Reset height - importante para diminuir quando o texto é removido
+      textareaRef.current.style.height = "auto"
+
+      // Definir a nova altura com base no conteúdo
+      const scrollHeight = textareaRef.current.scrollHeight
+      // Limitar a altura máxima a 120px
+      const newHeight = Math.min(scrollHeight, 120)
+      textareaRef.current.style.height = `${newHeight}px`
+    }
+  }, [input])
+
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
     }
   }, [messages])
 
-  // Update welcome message when environment changes
   useEffect(() => {
-    // Reset chat would be ideal here, but for now we'll just show a toast
     toast("Ambiente alterado", {
       description: `Agora conversando no ambiente ${environment}`,
     })
   }, [environment])
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -92,23 +111,16 @@ export function AIChat() {
     })
   }
 
-  const [mounted, setMounted] = useState(false);
+  if (!mounted) return null
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const currentTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
 
-  
-
-  const today = new Date()
-  if(!mounted) {
-    return null;
-  }
   return (
     <Card className="flex flex-col h-[500px] border-zinc-800">
       <CardHeader className="pb-2 pt-3 px-4 border-b border-zinc-800">
         <CardTitle className="text-sm font-medium text-zinc-400">Assistente IA - {environment}</CardTitle>
       </CardHeader>
+
       <CardContent className="flex-grow overflow-hidden p-0">
         <ScrollArea className="h-[400px] px-4 py-2" ref={scrollAreaRef}>
           <div className="space-y-3">
@@ -127,18 +139,17 @@ export function AIChat() {
                     </div>
                   </Avatar>
                   <div
-                    className={`rounded-lg p-2 ${
+                    className={`rounded-lg p-3 ${
                       message.role === "user" ? "bg-green-500 text-white" : "bg-zinc-800 text-white"
                     }`}
                   >
-                    <p className="text-xs whitespace-pre-wrap">{message.content}</p>
-                    <p className="text-[10px] opacity-50 mt-1">
-                      {today.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </p>
+                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                    <p className="text-[10px] opacity-50 mt-1">{currentTime}</p>
                   </div>
                 </div>
               </div>
             ))}
+
             {isLoading && messages[messages.length - 1]?.role === "user" && (
               <div className="flex justify-start">
                 <div className="flex items-start gap-2 max-w-[80%]">
@@ -154,18 +165,21 @@ export function AIChat() {
           </div>
         </ScrollArea>
       </CardContent>
+
       <div className="p-2 border-t border-zinc-800">
         <div className="flex w-full items-center space-x-2">
-          <Input
+          <Textarea
+            ref={textareaRef}
             placeholder="Digite sua mensagem..."
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             disabled={isLoading}
-            className="flex-1 h-8 bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs"
+            className="flex-1 min-h-8 max-h-[120px] bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500 focus-visible:ring-0 focus-visible:ring-offset-0 text-xs resize-none overflow-y-auto py-2"
+            rows={1}
           />
           {isLoading ? (
-            <Button onClick={handleCancelRequest} size="sm" variant="destructive" className="h-8 px-2">
+            <Button onClick={handleCancelRequest} size="sm" variant="destructive" className="h-8 px-2 self-start">
               <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
               Cancelar
             </Button>
@@ -174,7 +188,7 @@ export function AIChat() {
               onClick={(e) => handleSubmit(e as any)}
               disabled={!input.trim()}
               size="sm"
-              className="bg-green-500 hover:bg-green-600 text-white h-8 px-2"
+              className="bg-green-500 hover:bg-green-600 text-white h-8 px-2 self-start"
             >
               <Send className="h-3.5 w-3.5" />
             </Button>
