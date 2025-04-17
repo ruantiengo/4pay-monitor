@@ -30,7 +30,7 @@ export function AIChat() {
         id: "welcome-message",
         content: `Olá! Sou o assistente de monitoramento para o ambiente ${environment}. Como posso ajudar?`,
         role: "assistant",
-      },
+      }
     ],
     onResponse(response) {
         const reader = response.body?.getReader();
@@ -59,9 +59,7 @@ export function AIChat() {
         
     },
     onError: () => {
-      toast("Erro de comunicação", {
-        description: "Não foi possível obter resposta do assistente.",
-      })
+    
     },
   })
 

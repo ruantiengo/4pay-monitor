@@ -20,7 +20,7 @@ export async function getDeadLetters(environment: Environment, lastLoadTime?: st
 
     // Buscar as deadletters, ordenadas pela data de criação (mais recentes primeiro)
     const deadletters = await deadlettersCollection.find(    {
-      created_at: lastLoadTime ? { $gte: new Date(lastLoadTime) } : undefined
+      created_at: lastLoadTime ? { $gte: new Date(lastLoadTime) } : null
     }
     ).sort({ created_at: -1 }).limit(100).toArray()
  
@@ -35,7 +35,8 @@ export async function getDeadLetters(environment: Environment, lastLoadTime?: st
       uniqueIds.add(id)
       return true
     })
-
+    console.log(`Deadletters (${environment}):`, lastLoadTime,uniqueDeadletters);
+    
     // Converter os ObjectIds para strings para facilitar a serialização
     return {
       success: true,
