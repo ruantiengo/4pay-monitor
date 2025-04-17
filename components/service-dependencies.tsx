@@ -76,7 +76,7 @@ export function ServiceDependencies() {
           setServices(statusMap)
         }
       } catch (error) {
-        console.error("Erro ao carregar status dos serviços:", error)
+        console.error("Erro ao carregar status dos serviços: ", error)
       } 
     }
 
