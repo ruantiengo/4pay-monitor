@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useChat } from "@ai-sdk/react"
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -94,6 +94,18 @@ export function AIChat() {
     })
   }
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  
+
+  const today = new Date()
+  if(!mounted) {
+    return null;
+  }
   return (
     <Card className="flex flex-col h-[500px] border-zinc-800">
       <CardHeader className="pb-2 pt-3 px-4 border-b border-zinc-800">
@@ -123,7 +135,7 @@ export function AIChat() {
                   >
                     <p className="text-xs whitespace-pre-wrap">{message.content}</p>
                     <p className="text-[10px] opacity-50 mt-1">
-                      {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      {today.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </p>
                   </div>
                 </div>

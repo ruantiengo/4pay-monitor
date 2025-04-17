@@ -18,9 +18,6 @@ export async function getDeadLetters(environment: Environment, lastLoadTime?: st
     const db = client.db("connect_bank")
     const deadlettersCollection = db.collection("deadletters")
 
-    
-   
-
     // Buscar as deadletters, ordenadas pela data de criação (mais recentes primeiro)
     const deadletters = await deadlettersCollection.find(    {
       created_at: lastLoadTime ? { $gte: new Date(lastLoadTime) } : undefined

@@ -37,14 +37,12 @@ export function RabbitMQDeadLetter() {
   // Usar o contexto de notificações global
   const { hasNotification, addNotifications, markAsRead } = useNotifications()
 
-  // Chave para o localStorage
-  const getStorageKey = useCallback(() => `deadletter-cache-${environment}`, [environment])
 
   // Carregar do localStorage na inicialização
   useEffect(() => {
     if (typeof window === "undefined") return
 
-    const storageKey = getStorageKey()
+    const storageKey = `deadletter-cache-${environment}`
     const cachedData = localStorage.getItem(storageKey)
 
     if (cachedData) {
@@ -74,14 +72,14 @@ export function RabbitMQDeadLetter() {
       setDeadletters([])
       setLastLoadTime(undefined)
     }
-  }, [environment, getStorageKey])
+  }, [environment])
 
   // Salvar no localStorage
   const saveToLocalStorage = useCallback(
     (newDeadletters: DeadLetter[], newLastLoadTime: string) => {
       if (typeof window === "undefined") return
 
-      const storageKey = getStorageKey()
+      const storageKey = `deadletter-cache-${environment}`
       const cacheData: DeadLetterCache = {
         deadletters: newDeadletters,
         lastLoadTime: newLastLoadTime,
@@ -91,7 +89,7 @@ export function RabbitMQDeadLetter() {
       localStorage.setItem(storageKey, JSON.stringify(cacheData))
   
     },
-    [environment, getStorageKey],
+    [environment],
   )
 
   const fetchDeadLetters = useCallback(async () => {
@@ -182,7 +180,7 @@ export function RabbitMQDeadLetter() {
         intervalRef.current = null
       }
     }
-  }, [environment, fetchDeadLetters, deadletters.length, isRefreshing])
+  }, [environment])
 
   // Função manual de atualização
   const handleRefresh = useCallback(() => {
